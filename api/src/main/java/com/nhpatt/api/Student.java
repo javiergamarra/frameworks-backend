@@ -1,4 +1,4 @@
 package com.nhpatt.api;
 
-public record Student(String name, String surname) {
+public record Student(int id, String name, String surname) {
 }
