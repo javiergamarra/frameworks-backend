@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,18 +18,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/students")
 public class StudentController {
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     List<Student> students = new ArrayList<>(List.of(
             new Student(0, "Javier", "Gamarra"),
             new Student(1, "Juan", "Sanz")));
 
     @GetMapping
-    public List<Student> getStudent() {
-        return students;
+    public List<StudentDTO> getStudents() {
+        return this.students.stream().map(student -> modelMapper.map(student, StudentDTO.class)).collect(Collectors.toList());
     }
 
     @Operation(summary = "Get an student by its id")
@@ -80,3 +86,4 @@ public class StudentController {
     }
 
 }
+
