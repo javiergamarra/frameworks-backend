@@ -1,5 +1,11 @@
 package com.nhpatt.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +29,13 @@ public class StudentController {
         return students;
     }
 
+    @Operation(summary = "Get an student by its id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found the student",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Student.class))})})
     @GetMapping("/{id}")
+    @Tag(name = "students")
     public Student getStudent(@PathVariable int id) {
         return findStudent(id).orElseThrow(NoSuchElementException::new);
     }
