@@ -18,7 +18,7 @@ public class StudentController {
     private StudentService studentService;
 
     @GetMapping
-    public List<StudentDTO> getStudents() {
+    public List<Student> getStudents() {
         return studentService.getAllStudents();
     }
 
@@ -43,7 +43,7 @@ public class StudentController {
 
     @PutMapping("/{id}")
     public Student replaceStudent(@PathVariable int id, @RequestBody Student newStudent) {
-        return studentService.replaceStudent(id, newStudent);
+        return studentService.updateStudent(id, newStudent);
     }
 
     @PatchMapping("/{id}")

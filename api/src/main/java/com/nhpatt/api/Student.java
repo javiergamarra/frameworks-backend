@@ -1,27 +1,30 @@
 package com.nhpatt.api;
 
-import org.hibernate.validator.constraints.Length;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
-public final class Student {
+@Entity
+public class Student {
 
-    private final Integer id;
-    @Length(min = 4, message = "Longitud minima 4 caracteres")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
     private String name;
     private String surname;
 
-    public Student(int id, String name, String surname) {
-        this.id = id;
-        this.name = name;
-        this.surname = surname;
+    public Integer getId() {
+        return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public Integer getId() {
-        return id;
     }
 
     public void setName(String name) {
