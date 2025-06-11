@@ -4,6 +4,23 @@ const app = express();
 app.use(express.json());
 
 const Joi = require('joi');
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'User API',
+            version: '1.0.0',
+            description: 'User management API'
+        },
+    },
+    apis: ['*.js']
+};
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 
 const studentSchema = Joi.object({
     name: Joi.string().alphanum().min(3).max(30).required(),
@@ -30,6 +47,27 @@ app.use((req, res, next) => {
     next();
 });
 
+
+/**
+ * @swagger
+ * /students:
+ *   get:
+ *     summary: Returns a list of students
+ *     responses:
+ *       200:
+ *         description: A list of students
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ */
 app.get('/students', (req, res) => {
     res.send(students);
 });
