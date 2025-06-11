@@ -3,6 +3,26 @@ const app = express();
 
 app.use(express.json());
 
+const Joi = require('joi');
+
+const studentSchema = Joi.object({
+    name: Joi.string().alphanum().min(3).max(30).required(),
+    birthYear: Joi.number().integer().min(1900).max(new Date().getFullYear()),
+    surname: Joi.string(),
+});
+
+const validateUser = (req, res, next) => {
+    const {error} = studentSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            message: 'Validation error',
+            details: error.details.map(x => x.message)
+        });
+    }
+    next();
+};
+
+
 let students = [{id: 0, name: "javier", surname: "gamarra"}, {id: 1, name: "jorge", surname: "sanz"},]
 
 app.use((req, res, next) => {
@@ -23,7 +43,7 @@ app.delete('/students/:id', (req, res) => {
     res.send(undefined)
 });
 
-app.post('/students', (req, res) => {
+app.post('/students', validateUser, (req, res) => {
     students.push(req.body)
     res.send(req.body);
 });
