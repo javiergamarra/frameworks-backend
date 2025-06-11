@@ -5,6 +5,11 @@ app.use(express.json());
 
 let students = [{id: 0, name: "javier", surname: "gamarra"}, {id: 1, name: "jorge", surname: "sanz"},]
 
+app.use((req, res, next) => {
+    console.log('Middleware');
+    next();
+});
+
 app.get('/students', (req, res) => {
     res.send(students);
 });
