@@ -1,4 +1,7 @@
 const express = require('express');
+const {Sequelize, DataTypes} = require('sequelize');
+const {PrismaClient} = require('./generated/prisma');
+const prisma = new PrismaClient();
 const app = express();
 
 app.use(express.json());
@@ -8,6 +11,9 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const axios = require('axios');
+
+const sequelize = new Sequelize('postgresql://postgres:password@localhost:5432/postgres');
+
 
 const swaggerOptions = {
     definition: {
@@ -23,6 +29,16 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+const Student2 = sequelize.define('Student2', {
+    name: {type: DataTypes.STRING, allowNull: false},
+    surname: {type: DataTypes.STRING},
+    email: {
+        type: DataTypes.STRING, unique: true,
+        validate: {isEmail: true}
+    }
+});
+
+sequelize.sync({force: true});
 
 const studentSchema = Joi.object({
     name: Joi.string().alphanum().min(3).max(30).required(),
@@ -72,11 +88,35 @@ app.use((req, res, next) => {
  */
 app.get('/students', async (req, res) => {
 
-    const response = await axios.get("https://cdn.contentful.com/spaces/7bqz4c5fa32k/environments/master/entries/JeOVkhPsOUaAwJBNuyTyZ?access_token=gckuEehZljgwMhBdcwYzuOwu0lcC0qWBKXMJ3rwZs5Y");
-    console.error(response.data)
+    /* const response = await axios.get("https://cdn.contentful.com/spaces/7bqz4c5fa32k/environments/master/entries/JeOVkhPsOUaAwJBNuyTyZ?access_token=gckuEehZljgwMhBdcwYzuOwu0lcC0qWBKXMJ3rwZs5Y");
+     console.error(response.data)*/
+
+    Student2.create({name: "valor"})
+
+    const students = await Student2.findAll({
+        where: {name: 'valor'}
+    });
+    console.error(students);
 
     res.send(students);
 });
+
+app.get('/users', async (req, res) => {
+
+    await prisma.user.create({
+        data: {
+            email: "a@a.com",
+            name: "asd"
+        }
+    });
+
+    const users = await prisma.user.findMany();
+
+    console.log(users);
+
+    res.send();
+});
+
 
 app.get('/students/:id', (req, res) => {
     res.send(students[req.params.id]);
