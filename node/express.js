@@ -7,6 +7,8 @@ const Joi = require('joi');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+const axios = require('axios');
+
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
@@ -68,7 +70,11 @@ app.use((req, res, next) => {
  *                   name:
  *                     type: string
  */
-app.get('/students', (req, res) => {
+app.get('/students', async (req, res) => {
+
+    const response = await axios.get("https://cdn.contentful.com/spaces/7bqz4c5fa32k/environments/master/entries/JeOVkhPsOUaAwJBNuyTyZ?access_token=gckuEehZljgwMhBdcwYzuOwu0lcC0qWBKXMJ3rwZs5Y");
+    console.error(response.data)
+
     res.send(students);
 });
 
