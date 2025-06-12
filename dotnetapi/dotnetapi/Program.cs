@@ -1,3 +1,5 @@
+using System.Collections;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,28 +16,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
+
+app.MapGet("/students", () =>
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
+        return new ArrayList { new Student("Javier", "Gamarra"),  new Student("Jorge", "Sanz") };;
     })
-    .WithName("GetWeatherForecast");
+    .WithName("GetStudents");
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+public record Student(string name, string surname);
