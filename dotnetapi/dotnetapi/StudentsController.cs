@@ -5,16 +5,23 @@ namespace dotnetapi;
 
 [ApiController]
 [Route("api/students")]
-public class StudentsController(IAlumnoService alumnoService) : ControllerBase
+public class StudentsController(IAlumnoService alumnoService, HttpClient httpClient, AppDbContext appDbContext) : ControllerBase
 {
     private List<Student> _students = [new(0, "Javier", "Gamarra"), new(1, "Jorge", "Sanz")];
 
     [HttpGet]
-    public ActionResult<IEnumerable<Student>> GetAll()
+    public async Task<ActionResult<IEnumerable<Student>>> GetAll()
     {
-        var requestHeader = Request.Headers["Authorization"];
+        return appDbContext.Students.ToList();
+        
 
-        throw new Exception();
+
+        var async = await httpClient.GetAsync("https://cdn.contentful.com/spaces/7bqz4c5fa32k/environments/master/entries?access_token=zERw6wiDlFsQKZy4zfj5MMnzHQ2luwlrk3FMC1Psf1g");
+
+        var readFromJsonAsync = await async.Content.ReadFromJsonAsync<Object>();
+
+        var requestHeader = Request.Headers["Authorization"];
+        
         _students = [new Student(0, "Javier", "Gamarra"), new Student(1, "Jorge", "Sanz")];
         return _students;
     }
@@ -22,7 +29,11 @@ public class StudentsController(IAlumnoService alumnoService) : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Student> GetById(int id)
     {
-        var student = _students.FirstOrDefault(p => p.id == id);
+
+        return appDbContext.Students.First(p => p.Id == id);
+
+        
+        var student = _students.FirstOrDefault(p => p.Id == id);
         if (student == null)
             return NotFound();
 
@@ -31,14 +42,18 @@ public class StudentsController(IAlumnoService alumnoService) : ControllerBase
     
     
     [HttpPost]
-    public ActionResult<Student> Create(Student student)
+    public ActionResult<StudentDTO> Create(Student student)
     {
-        alumnoService.create(student);
-        return student;
+        
+        appDbContext.Students.Add(student);
+        appDbContext.SaveChanges();
+        
+        var studentDto = alumnoService.create(student);
+        return Ok(studentDto);
     }
 }
 
 public interface IAlumnoService
 {
-    Student create(Student student);
+    StudentDTO create(Student student);
 }

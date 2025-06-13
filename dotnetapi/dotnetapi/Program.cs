@@ -1,20 +1,28 @@
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using dotnetapi;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+
+builder.Services.AddControllers().AddControllersAsServices();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer(); 
 builder.Services.AddSwaggerGen();
-builder.Services.AddSingleton<IAlumnoService, AlumnoService>();
+builder.Services.AddScoped<IAlumnoService, AlumnoService>();
+builder.Services.AddHttpClient();
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql("Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=password"));
+
+
 
 var app = builder.Build();
 
@@ -47,9 +55,8 @@ app.UseExceptionHandler(appBuilder =>
         logger.LogError(exception, "Unhandled exception");
         
         context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        context.Response.ContentType = "application/problem+json";
         
-        await context.Response.WriteAsJsonAsync(problemDetails);
+        await context.Response.WriteAsJsonAsync(problemDetails, options: null,contentType: "application/problem+json");
     });
 });
 
@@ -71,13 +78,50 @@ app.MapGet("/students", () =>
 
 app.Run();
 
-public record Student(long id, [MinLength(3)] string name, string surname);
+public record Student(long Id, [MinLength(3)] string Name, string Surname);
 
-public class AlumnoService : IAlumnoService
+public class Solicitud {
+    public int Id { get; set; }
+    public required Student Student { get; set; }
+    public required List<Parents> Parents { get; set; }
+}
+
+public record Parents(long Id, [MinLength(3)] string Name, string Surname)
+{
+}
+
+
+public class AlumnoService(IMapper imapper) : IAlumnoService
 
 {
-    public Student create(Student student)
+    public StudentDTO create(Student student)
     {
-        return student;
+        var studentDto = imapper.Map<StudentDTO>(student);
+        return studentDto;
     }
+}
+
+public class StudentDTO
+{
+    public string Name { get; set; }
+    public string Surname { get; set; }
+}
+
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        CreateMap<Student, StudentDTO>();
+    }
+}
+
+public class AppDbContext : DbContext {
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) {}
+    
+    public DbSet<Student> Students { get; set; }
+    
+    public DbSet<Parents> Parents { get; set; }
+    
+    public DbSet<Solicitud> Solicitud { get; set; }
 }
